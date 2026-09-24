@@ -13,14 +13,7 @@ namespace Viznity.SharedSettings.Editor
         [MenuItem("Tools/Viznity/Shared Settings/Create or Select Config")]
         private static void CreateOrSelect()
         {
-            var config = AssetDatabase.LoadAssetAtPath<ViznitySharedSettingsConfig>(AssetPath) ?? ViznitySharedSettingsConfig.Load();
-            if (config == null)
-            {
-                if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets", "Resources");
-                config = ScriptableObject.CreateInstance<ViznitySharedSettingsConfig>();
-                AssetDatabase.CreateAsset(config, AssetPath);
-                AssetDatabase.SaveAssets();
-            }
+            var config = SharedSettingsPreBuild.EnsureConfigExistsAndPopulated();
             Selection.activeObject = config;
             EditorGUIUtility.PingObject(config);
         }

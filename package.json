@@ -1,7 +1,7 @@
 {
   "name": "com.viznitygames.sharedsettings",
-  "version": "1.3.0",
-  "displayName": "Viznity Shared Settings",
+  "version": "1.4.0",
+  "displayName": "Viznity Games Desktop | Shared Settings",
   "description": "Reads the settings Viznity Games Desktop shares with installed games (language, per-game language, skip intro, achievement notifications, and any key added later) from the per-user shared-settings.json. Set up per game with one config asset, no script. No dependencies; optional Unity Localization support.",
   "unity": "2021.3",
   "keywords": [
