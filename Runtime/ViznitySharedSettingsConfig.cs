@@ -34,7 +34,7 @@ namespace Viznity.SharedSettings
             GameSettingsStore,
         }
 
-        [Tooltip("This game's id in the launcher: hellasure, train-with-elsa, ricks-lewd-universe, kiva-sucks-at-videogames.")]
+        [Tooltip("This game's id in the launcher. Leave empty to derive it from Project Settings > Product Name (\"Rick's Lewd Universe\" -> ricks-lewd-universe).")]
         public string gameId = "";
 
         [Tooltip("Where the launcher's language goes. It is applied once per launcher change, so a language picked in the game is kept.")]

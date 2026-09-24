@@ -146,6 +146,18 @@ namespace Viznity.SharedSettings.Tests
         }
 
         [Test]
+        public void GameIdComesFromTheProductName()
+        {
+            Assert.AreEqual("ricks-lewd-universe", GameIdentity.Slug("Rick's Lewd Universe"));
+            Assert.AreEqual("ricks-lewd-universe", GameIdentity.Slug("Rick’s  Lewd   Universe!"));
+            Assert.AreEqual("kiva-sucks-at-videogames", GameIdentity.Slug("Kiva Sucks at Videogames"));
+            Assert.AreEqual("hellasure", GameIdentity.Slug("Hellasure"));
+            Assert.AreEqual("train-with-elsa", GameIdentity.Slug("Train With Elsa"));
+            Assert.AreEqual("RicksLewdUniverse", GameIdentity.Pascal("Rick's Lewd Universe"));
+            Assert.AreEqual("KivaSucksAtVideogames", GameIdentity.Pascal("Kiva Sucks at Videogames"));
+        }
+
+        [Test]
         public void PrimarySubtag()
         {
             Assert.AreEqual("pt", LanguageSync.PrimarySubtag("pt-BR"));

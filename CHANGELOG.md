@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0] - 2026-09-24
+
+- The game id defaults to Project Settings > Product Name as a slug ("Rick's Lewd Universe" ->
+  `ricks-lewd-universe`), so a config asset or script copied into another game needs no edits.
+  `GameIdentity.Slug` / `Pascal` are public for game code (the GitLab build project is
+  `<Pascal>Build`).
+
 ## [1.2.0] - 2026-09-24
 
 - New language target `GameSettingsStore`: writes the option index into a game's own settings store

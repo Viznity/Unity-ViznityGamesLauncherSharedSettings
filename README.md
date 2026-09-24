@@ -31,16 +31,16 @@
 In **Window › Package Manager › + › Add package from git URL…**, enter:
 
 ```
-https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.2.0
+https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.3.0
 ```
 
 You can also add it to `Packages/manifest.json`:
 
 ```json
-"com.viznitygames.sharedsettings": "https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.2.0"
+"com.viznitygames.sharedsettings": "https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.3.0"
 ```
 
-Pin a tag (`#v1.2.0`). Every game then keeps the exact version it was tested with, until you move it to a newer tag yourself.
+Pin a tag (`#v1.3.0`). Every game then keeps the exact version it was tested with, until you move it to a newer tag yourself.
 
 ## 2. Quick start
 
@@ -49,9 +49,9 @@ Every game is set up with **one asset and no script**:
 1. Open **Tools › Viznity › Shared Settings › Create or Select Config**. This creates
    `Assets/Resources/ViznitySharedSettingsConfig.asset`.
 2. In the Inspector, set:
-   - **Game Id**: the game's id in the launcher (`hellasure`, `train-with-elsa`,
-     `ricks-lewd-universe`, `kiva-sucks-at-videogames`). The launcher's `releases::GAME_IDS` list is
-     the source of truth.
+   - **Game Id**: leave it empty. The id is derived from Project Settings › Product Name
+     (`Rick's Lewd Universe` → `ricks-lewd-universe`, `Hellasure` → `hellasure`), which matches the
+     launcher's `releases::GAME_IDS`. Fill it in only if a product name ever differs from the launcher id.
    - **Language Target**: where the launcher's language goes (see §4):
      - `UnityLocalization`: select the matching locale in Unity Localization.
      - `PlayerPrefsIndex`: for games whose language menu stores an option index in PlayerPrefs.
@@ -212,7 +212,7 @@ The example below adds `subtitles_enabled` (bool, default on).
 **Each game that should honor it**
 
 9. Use the setting, e.g. `ViznitySharedSettings.Current.SubtitlesEnabled`. Before steps 6–8 are released, `Current.GetBool("subtitles_enabled", true)` works too.
-10. If you did steps 6–8, move the game's manifest entry to the new tag (`#v1.2.0`).
+10. If you did steps 6–8, move the game's manifest entry to the new tag (`#v1.3.0`).
 11. Build and publish a new game version.
 
 Rules for new keys:

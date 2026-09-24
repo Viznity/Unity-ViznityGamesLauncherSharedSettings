@@ -25,11 +25,17 @@ namespace Viznity.SharedSettings
         private static DateTime _lastWriteUtc;
         private static long _lastLength = -1;
 
+        private static string _gameId;
+
         /// <summary>
         /// This game's id in the launcher (the keys of <c>game_languages</c>, e.g. "ricks-lewd-universe").
-        /// Set it once before using the per-game helpers.
+        /// Defaults to <see cref="GameIdentity.FromProductName"/>; the config's Game Id or a value set here wins.
         /// </summary>
-        public static string GameId { get; set; }
+        public static string GameId
+        {
+            get => string.IsNullOrEmpty(_gameId) ? GameIdentity.FromProductName() : _gameId;
+            set => _gameId = value;
+        }
 
         /// <summary>The file being read. Override for tests or a custom location; null restores the default.</summary>
         public static string FilePath
@@ -162,7 +168,7 @@ namespace Viznity.SharedSettings
         {
             lock (Gate) { _current = null; _pathOverride = null; _lastLength = -1; }
             Changed = null;
-            GameId = null;
+            _gameId = null;
         }
     }
 }
