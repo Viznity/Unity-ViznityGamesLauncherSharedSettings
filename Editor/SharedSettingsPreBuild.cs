@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Viznity.SharedSettings.Editor
 {
-    public class SharedSettingsPreBuild : IPreprocessBuildWithReport
+    public class SharedSettingsPreBuild : AssetPostprocessor, IPreprocessBuildWithReport
     {
         public int callbackOrder => 0;
 
@@ -32,26 +32,28 @@ namespace Viznity.SharedSettings.Editor
                 isNew = true;
             }
 
-            bool changed = isNew;
+            PopulateConfig(config);
+            return config;
+        }
 
-            // Populate Game ID
+        public static void PopulateConfig(ViznitySharedSettingsConfig config)
+        {
+            bool changed = false;
+
             if (string.IsNullOrEmpty(config.gameId))
             {
                 string productName = PlayerSettings.productName;
-                // Remove everything except letters and digits, convert to lowercase
                 string safeName = Regex.Replace(productName, @"[^a-zA-Z0-9]", "").ToLowerInvariant();
                 config.gameId = safeName;
                 changed = true;
             }
 
-            // Enable Watch for Changes
             if (!config.watchForChanges)
             {
                 config.watchForChanges = true;
                 changed = true;
             }
 
-            // Pull Language Codes from Localization Assets
             if (config.languageCodes == null || config.languageCodes.Count == 0)
             {
                 var locales = new System.Collections.Generic.List<string>();
@@ -78,10 +80,26 @@ namespace Viznity.SharedSettings.Editor
                 }
             }
             
-            // Set useful options automatically
             if (config.languageTarget == ViznitySharedSettingsConfig.LanguageTarget.None && config.languageCodes.Count > 0)
             {
                 config.languageTarget = ViznitySharedSettingsConfig.LanguageTarget.UnityLocalization;
+                changed = true;
+            }
+
+            // Fill default e.g. values
+            if (string.IsNullOrEmpty(config.settingsStoreType))
+            {
+                config.settingsStoreType = "Game.UI.SettingsSaveManager";
+                changed = true;
+            }
+            if (string.IsNullOrEmpty(config.reapplyMethod))
+            {
+                config.reapplyMethod = "Game.UI.SettingsBootstrap.ReloadAndApply";
+                changed = true;
+            }
+            if (config.settingsStoreKeys == null || config.settingsStoreKeys.Count == 0)
+            {
+                config.settingsStoreKeys = new System.Collections.Generic.List<string> { "OptionPicker_Language", "OptionPicker_DialogueLanguage" };
                 changed = true;
             }
 
@@ -91,8 +109,24 @@ namespace Viznity.SharedSettings.Editor
                 AssetDatabase.SaveAssets();
                 Debug.Log($"[Viznity Shared Settings] Config auto-populated. GameId: {config.gameId}, Languages: {string.Join(", ", config.languageCodes)}");
             }
+        }
 
-            return config;
+        private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+        {
+            foreach (var str in importedAssets)
+            {
+                if (str.EndsWith(".asset"))
+                {
+                    var obj = AssetDatabase.LoadAssetAtPath<ViznitySharedSettingsConfig>(str);
+                    if (obj != null)
+                    {
+                        if (string.IsNullOrEmpty(obj.gameId))
+                        {
+                            PopulateConfig(obj);
+                        }
+                    }
+                }
+            }
         }
     }
 }

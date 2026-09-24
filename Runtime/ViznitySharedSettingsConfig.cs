@@ -5,11 +5,11 @@ namespace Viznity.SharedSettings
 {
     /// <summary>
     /// Per-game setup, so a game needs no script of its own: one asset at
-    /// <c>Assets/Resources/ViznitySharedSettingsConfig.asset</c> (Tools › Viznity › Shared Settings ›
+    /// <c>Assets/Resources/ViznitySharedSettingsConfig.asset</c> (Tools › Viznity Games › Shared Settings ›
     /// Create Config). Read before the first scene loads by <see cref="SharedSettingsBootstrap"/>.
     /// Without the asset the package does nothing on its own; the code API still works.
     /// </summary>
-    [CreateAssetMenu(fileName = ResourceName, menuName = "Viznity/Shared Settings Config")]
+    [CreateAssetMenu(fileName = ResourceName, menuName = "Viznity Games/Shared Settings Config")]
     public sealed class ViznitySharedSettingsConfig : ScriptableObject
     {
         /// <summary>The asset's name under a Resources folder.</summary>

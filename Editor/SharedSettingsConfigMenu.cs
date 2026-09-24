@@ -10,7 +10,7 @@ namespace Viznity.SharedSettings.Editor
         private const string AssetPath = Folder + "/" + ViznitySharedSettingsConfig.ResourceName + ".asset";
 
         /// <summary>Creates (or selects) the one config the package reads, in a Resources folder where it is found at runtime.</summary>
-        [MenuItem("Tools/Viznity/Shared Settings/Create or Select Config")]
+        [MenuItem("Tools/Viznity Games/Shared Settings/Create or Select Config")]
         private static void CreateOrSelect()
         {
             var config = SharedSettingsPreBuild.EnsureConfigExistsAndPopulated();
@@ -18,7 +18,7 @@ namespace Viznity.SharedSettings.Editor
             EditorGUIUtility.PingObject(config);
         }
 
-        [MenuItem("Tools/Viznity/Shared Settings/Show Current File")]
+        [MenuItem("Tools/Viznity Games/Shared Settings/Show Current File")]
         private static void ShowFile()
         {
             string path = ViznitySharedSettings.FilePath;
