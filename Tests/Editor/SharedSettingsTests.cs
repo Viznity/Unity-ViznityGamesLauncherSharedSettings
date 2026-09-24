@@ -114,6 +114,18 @@ namespace Viznity.SharedSettings.Tests
         }
 
         [Test]
+        public void ConfigMapsCodesToMenuIndexes()
+        {
+            var config = UnityEngine.ScriptableObject.CreateInstance<ViznitySharedSettingsConfig>();
+            config.languageCodes = new List<string> { "en", "ru", "tr", "pt", "zh-Hans" };
+            Assert.AreEqual(2, config.IndexOf("tr"));
+            Assert.AreEqual(3, config.IndexOf("pt-BR"), "primary language match");
+            Assert.AreEqual(4, config.IndexOf("zh"));
+            Assert.AreEqual(-1, config.IndexOf("ja"));
+            Assert.AreEqual(-1, config.IndexOf(null));
+        }
+
+        [Test]
         public void PrimarySubtag()
         {
             Assert.AreEqual("pt", LanguageSync.PrimarySubtag("pt-BR"));

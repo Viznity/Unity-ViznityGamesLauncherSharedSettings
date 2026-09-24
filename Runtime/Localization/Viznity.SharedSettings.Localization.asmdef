@@ -3,7 +3,8 @@
     "rootNamespace": "Viznity.SharedSettings.Localization",
     "references": [
         "Viznity.SharedSettings",
-        "Unity.Localization"
+        "Unity.Localization",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

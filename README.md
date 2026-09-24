@@ -31,47 +31,48 @@
 In **Window › Package Manager › + › Add package from git URL…**, enter:
 
 ```
-https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.0.0
+https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.1.0
 ```
 
 You can also add it to `Packages/manifest.json`:
 
 ```json
-"com.viznitygames.sharedsettings": "https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.0.0"
+"com.viznitygames.sharedsettings": "https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.1.0"
 ```
 
-Pin a tag (`#v1.0.0`). Every game then keeps the exact version it was tested with, until you move it to a newer tag yourself.
+Pin a tag (`#v1.1.0`). Every game then keeps the exact version it was tested with, until you move it to a newer tag yourself.
 
 ## 2. Quick start
 
-Add one script to the game (any folder under `Assets/`):
+Every game is set up with **one asset and no script**:
+
+1. Open **Tools › Viznity › Shared Settings › Create or Select Config**. This creates
+   `Assets/Resources/ViznitySharedSettingsConfig.asset`.
+2. In the Inspector, set:
+   - **Game Id**: the game's id in the launcher (`hellasure`, `train-with-elsa`,
+     `ricks-lewd-universe`, `kiva-sucks-at-videogames`). The launcher's `releases::GAME_IDS` list is
+     the source of truth.
+   - **Language Target**: where the launcher's language goes (see §4):
+     - `UnityLocalization`: select the matching locale in Unity Localization.
+     - `PlayerPrefsIndex`: for games whose language menu stores an option index in PlayerPrefs.
+       Fill in **Player Prefs Key** and **Language Codes** in menu order.
+     - `None`: do nothing with the language.
+   - **Watch For Changes** (optional): react while the game runs (§6).
+
+Before the first scene loads, the package reads the config and applies it. A game without the
+asset is left alone, and the code API below still works.
+
+Read other settings wherever you need them:
 
 ```csharp
-using UnityEngine;
 using Viznity.SharedSettings;
 
-public static class ViznityLauncherSetup
-{
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Init()
-    {
-        // This game's id in the launcher (the keys of "game_languages").
-        ViznitySharedSettings.GameId = "ricks-lewd-universe";
-
-        // Unity Localization projects: select the launcher's language (see §4).
-        Viznity.SharedSettings.Localization.UnityLocalizationLanguageSync.ApplyWhenReady();
-    }
-}
-```
-
-Then read settings wherever you need them:
-
-```csharp
 if (ViznitySharedSettings.ShouldSkipIntro) LoadMainMenu();
 bool toasts = ViznitySharedSettings.Current.AchievementNotificationsEnabled;
 ```
 
-Game ids used by the launcher: `hellasure`, `train-with-elsa`, `ricks-lewd-universe` and `kiva-sucks-at-videogames`. The launcher's `releases::GAME_IDS` list is the source of truth.
+**Tools › Viznity › Shared Settings › Show Current File** logs the file the package reads and
+opens its folder.
 
 ## 3. The settings
 
@@ -111,9 +112,19 @@ if (LanguageSync.TryTakeChangedLanguage(out string code))
     MyLanguageMenu.Select(code);   // "pt-BR" etc.; use LanguageSync.PrimarySubtag(code) for "pt"
 ```
 
-**Unity Localization.** `UnityLocalizationLanguageSync.ApplyWhenReady()` waits for Localization to initialize. It then selects the matching locale: an exact match (`pt-BR`) first, then the same language (`pt`). If the game doesn't ship the language, nothing changes. This module is its own assembly. It compiles only when `com.unity.localization` 1.0+ is installed, so games without Localization are unaffected.
+**Unity Localization.** Set **Language Target** to `UnityLocalization`. The package waits for
+Localization to initialize, then selects the matching locale: an exact match (`pt-BR`) first, then
+the same language (`pt`). If the game doesn't ship the language, nothing changes. This part is its
+own assembly and compiles only when `com.unity.localization` 1.0+ is installed, so games without
+Localization are unaffected. From code, call `UnityLocalizationLanguageSync.ApplyWhenReady()`.
 
-**Custom language menus.** Some games store their menu's index in PlayerPrefs, as Rick's Lewd Universe does with `ChangeLanguage.cs`. Import the **Option-index language menu** sample from the Package Manager (package › Samples). It maps language codes to menu indexes before the first scene loads.
+**Option-index language menus.** Some games keep their own language menu that stores an index in
+PlayerPrefs and applies it in `Start` (for example Rick's Lewd Universe's `ChangeLanguage.cs`, which
+also drives Dialogue System and Localization). Set **Language Target** to `PlayerPrefsIndex`,
+**Player Prefs Key** to that key (`currentOption`), and **Language Codes** in menu order, e.g.
+`en, ru, tr, fr, it, de, es, pt, ja, ko, zh`. The index is written before the first scene, so the
+menu's `Start` already sees it. **Legacy Marker Pref Key** carries over the marker of an older
+per-game script once (Rick's: `launcherLanguageApplied`), so players keep their in-game choice.
 
 **Dialogue System** or other systems: call `TryTakeChangedLanguage` and pass the code to the system, e.g. `DialogueManager.SetLanguage(code)`.
 

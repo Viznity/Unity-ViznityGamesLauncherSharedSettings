@@ -1,0 +1,18 @@
+{
+    "name": "Viznity.SharedSettings.Editor",
+    "rootNamespace": "Viznity.SharedSettings.Editor",
+    "references": [
+        "Viznity.SharedSettings"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

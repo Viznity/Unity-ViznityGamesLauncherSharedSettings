@@ -19,6 +19,26 @@ namespace Viznity.SharedSettings.Localization
     public static class UnityLocalizationLanguageSync
     {
         /// <summary>
+        /// Applies the config's UnityLocalization target. Reads the config itself (and sets the game id), since
+        /// Unity does not order two BeforeSceneLoad methods in different assemblies.
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void ApplyFromConfig()
+        {
+            try
+            {
+                var config = ViznitySharedSettingsConfig.Load();
+                if (config == null || config.languageTarget != ViznitySharedSettingsConfig.LanguageTarget.UnityLocalization) return;
+                if (!string.IsNullOrEmpty(config.gameId)) ViznitySharedSettings.GameId = config.gameId;
+                ApplyWhenReady();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("[Viznity Shared Settings] Localization sync skipped: " + e.Message);
+            }
+        }
+
+        /// <summary>
         /// Waits for Localization to initialize, then selects the launcher's locale if it changed. Safe to call
         /// before the first scene; runs on a hidden helper object that removes itself afterwards.
         /// </summary>
