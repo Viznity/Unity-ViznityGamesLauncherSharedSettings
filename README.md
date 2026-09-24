@@ -31,16 +31,16 @@
 In **Window › Package Manager › + › Add package from git URL…**, enter:
 
 ```
-https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.1.0
+https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.2.0
 ```
 
 You can also add it to `Packages/manifest.json`:
 
 ```json
-"com.viznitygames.sharedsettings": "https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.1.0"
+"com.viznitygames.sharedsettings": "https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings.git#v1.2.0"
 ```
 
-Pin a tag (`#v1.1.0`). Every game then keeps the exact version it was tested with, until you move it to a newer tag yourself.
+Pin a tag (`#v1.2.0`). Every game then keeps the exact version it was tested with, until you move it to a newer tag yourself.
 
 ## 2. Quick start
 
@@ -56,6 +56,8 @@ Every game is set up with **one asset and no script**:
      - `UnityLocalization`: select the matching locale in Unity Localization.
      - `PlayerPrefsIndex`: for games whose language menu stores an option index in PlayerPrefs.
        Fill in **Player Prefs Key** and **Language Codes** in menu order.
+     - `GameSettingsStore`: for games with their own settings system (Hellasure). The package
+       writes the option index into the game's store by name and asks the game to apply it.
      - `None`: do nothing with the language.
    - **Watch For Changes** (optional): react while the game runs (§6).
 
@@ -126,6 +128,27 @@ also drives Dialogue System and Localization). Set **Language Target** to `Playe
 menu's `Start` already sees it. **Legacy Marker Pref Key** carries over the marker of an older
 per-game script once (Rick's: `launcherLanguageApplied`), so players keep their in-game choice.
 
+**Games with their own settings system (Hellasure).** Hellasure keeps its settings in
+`Game.UI.SettingsSaveManager` (a `Settings.json` in `persistentDataPath`). The language is an index
+into Unity Localization's locales under `OptionPicker_Language` and `OptionPicker_DialogueLanguage`,
+and `Game.UI.SettingsBootstrap` applies it at start (Localization, Dialogue System). If the package
+set the locale directly, that bootstrap would put the saved one back. So the config writes into the
+store instead:
+
+| Field | Hellasure |
+|---|---|
+| Language Target | `GameSettingsStore` |
+| Language Codes | empty (use Unity Localization's locale order, like the game's menu) |
+| Settings Store Type | `Game.UI.SettingsSaveManager` |
+| Settings Store Set Int Method | `SetInt` |
+| Settings Store Save Method | `SaveSettings` |
+| Settings Store Keys | `OptionPicker_Language`, `OptionPicker_DialogueLanguage` |
+| Reapply Method | `Game.UI.SettingsBootstrap.ReloadAndApply` |
+
+The methods are found by name at runtime, so the package has no compile-time dependency on the
+game. A wrong name is logged as a warning and the game keeps its language. The launcher language is
+applied once per change, so a language the player then picks in the settings menu is kept.
+
 **Dialogue System** or other systems: call `TryTakeChangedLanguage` and pass the code to the system, e.g. `DialogueManager.SetLanguage(code)`.
 
 ## 5. Skip intro
@@ -189,7 +212,7 @@ The example below adds `subtitles_enabled` (bool, default on).
 **Each game that should honor it**
 
 9. Use the setting, e.g. `ViznitySharedSettings.Current.SubtitlesEnabled`. Before steps 6–8 are released, `Current.GetBool("subtitles_enabled", true)` works too.
-10. If you did steps 6–8, move the game's manifest entry to the new tag (`#v1.1.0`).
+10. If you did steps 6–8, move the game's manifest entry to the new tag (`#v1.2.0`).
 11. Build and publish a new game version.
 
 Rules for new keys:

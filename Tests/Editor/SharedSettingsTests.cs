@@ -126,6 +126,26 @@ namespace Viznity.SharedSettings.Tests
         }
 
         [Test]
+        public void GameSettingsStoreWritesSavesAndReapplies()
+        {
+            FakeSettingsStore.Reset();
+            var config = UnityEngine.ScriptableObject.CreateInstance<ViznitySharedSettingsConfig>();
+            config.languageTarget = ViznitySharedSettingsConfig.LanguageTarget.GameSettingsStore;
+            config.settingsStoreType = typeof(FakeSettingsStore).FullName;
+            config.settingsStoreKeys = new List<string> { "OptionPicker_Language", "OptionPicker_DialogueLanguage" };
+            config.reapplyMethod = typeof(FakeSettingsStore).FullName + ".ReloadAndApply";
+
+            Assert.IsTrue(SharedSettingsBootstrap.WriteLanguageIndex(config, "tr", 3));
+            Assert.AreEqual(3, FakeSettingsStore.Values["OptionPicker_Language"]);
+            Assert.AreEqual(3, FakeSettingsStore.Values["OptionPicker_DialogueLanguage"]);
+            Assert.AreEqual(1, FakeSettingsStore.Saves);
+            Assert.AreEqual(1, FakeSettingsStore.Reapplies);
+
+            config.settingsStoreType = "No.Such.Type";
+            Assert.IsFalse(SharedSettingsBootstrap.WriteLanguageIndex(config, "tr", 3), "a missing store is reported, not thrown");
+        }
+
+        [Test]
         public void PrimarySubtag()
         {
             Assert.AreEqual("pt", LanguageSync.PrimarySubtag("pt-BR"));
@@ -189,5 +209,17 @@ namespace Viznity.SharedSettings.Tests
             CommandLine.ArgsOverride = new[] { "Game.exe", "nointro" };
             Assert.IsFalse(ViznitySharedSettings.ShouldSkipIntro, "a bare word is not a flag");
         }
+    }
+
+    // Stands in for Hellasure's Game.UI.SettingsSaveManager / SettingsBootstrap.
+    public static class FakeSettingsStore
+    {
+        public static readonly Dictionary<string, int> Values = new Dictionary<string, int>();
+        public static int Saves;
+        public static int Reapplies;
+        public static void Reset() { Values.Clear(); Saves = 0; Reapplies = 0; }
+        public static void SetInt(string key, int value) => Values[key] = value;
+        public static void SaveSettings() => Saves++;
+        public static void ReloadAndApply() => Reapplies++;
     }
 }

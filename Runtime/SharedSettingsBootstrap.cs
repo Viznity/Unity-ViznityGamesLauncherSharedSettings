@@ -32,23 +32,47 @@ namespace Viznity.SharedSettings
             if (!string.IsNullOrEmpty(config.gameId)) ViznitySharedSettings.GameId = config.gameId;
             MigrateLegacyMarker(config.legacyMarkerPrefKey);
 
-            if (config.languageTarget == ViznitySharedSettingsConfig.LanguageTarget.PlayerPrefsIndex &&
-                LanguageSync.TryTakeChangedLanguage(out string code))
+            // Index targets with an explicit code list are applied here; with no list the index comes from
+            // Unity Localization's locales, which the Localization module applies once they are loaded.
+            bool indexTarget = config.languageTarget == ViznitySharedSettingsConfig.LanguageTarget.PlayerPrefsIndex ||
+                               config.languageTarget == ViznitySharedSettingsConfig.LanguageTarget.GameSettingsStore;
+            if (indexTarget && !config.UsesLocaleOrder && LanguageSync.TryTakeChangedLanguage(out string code))
             {
                 int index = config.IndexOf(code);
-                if (index >= 0 && !string.IsNullOrEmpty(config.playerPrefsKey))
-                {
-                    PlayerPrefs.SetInt(config.playerPrefsKey, index);
-                    PlayerPrefs.Save();
-                    Debug.Log($"[Viznity Shared Settings] Using the launcher language '{code}'.");
-                }
-                else
-                {
-                    Debug.Log($"[Viznity Shared Settings] This game has no '{code}' option; keeping its own language.");
-                }
+                if (index >= 0) WriteLanguageIndex(config, code, index);
+                else Debug.Log($"[Viznity Shared Settings] This game has no '{code}' option; keeping its own language.");
+            }
+            else if (indexTarget && config.UsesLocaleOrder &&
+                     GameSettingsStore.FindType("Viznity.SharedSettings.Localization.UnityLocalizationLanguageSync") == null)
+            {
+                Debug.LogWarning("[Viznity Shared Settings] Language Codes is empty and Unity Localization is not installed, so there is no option order to use. Fill in Language Codes.");
             }
 
             if (config.watchForChanges) ViznitySharedSettings.WatchForChanges = true;
+        }
+
+        /// <summary>
+        /// Writes <paramref name="index"/> where the config's target keeps the language: a PlayerPrefs int, or the
+        /// game's own settings store (then saved and re-applied through the game's methods). Returns false when the
+        /// target could not be written; the reason is logged.
+        /// </summary>
+        public static bool WriteLanguageIndex(ViznitySharedSettingsConfig config, string code, int index)
+        {
+            switch (config.languageTarget)
+            {
+                case ViznitySharedSettingsConfig.LanguageTarget.PlayerPrefsIndex:
+                    if (string.IsNullOrEmpty(config.playerPrefsKey)) return false;
+                    PlayerPrefs.SetInt(config.playerPrefsKey, index);
+                    PlayerPrefs.Save();
+                    break;
+                case ViznitySharedSettingsConfig.LanguageTarget.GameSettingsStore:
+                    if (!GameSettingsStore.Write(config, index)) return false;
+                    break;
+                default:
+                    return false;
+            }
+            Debug.Log($"[Viznity Shared Settings] Using the launcher language '{code}' (option {index}).");
+            return true;
         }
 
         private static void MigrateLegacyMarker(string legacyKey)

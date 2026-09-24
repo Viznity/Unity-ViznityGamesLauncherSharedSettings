@@ -26,6 +26,12 @@ namespace Viznity.SharedSettings
             /// (the index is the position of the language in <see cref="languageCodes"/>).
             /// </summary>
             PlayerPrefsIndex,
+            /// <summary>
+            /// Write the option index into the game's own settings store through its static
+            /// <c>SetInt(string, int)</c> (and save/re-apply methods), found by name at runtime, e.g. Hellasure's
+            /// <c>Game.UI.SettingsSaveManager</c>. No compile-time dependency on the game's code.
+            /// </summary>
+            GameSettingsStore,
         }
 
         [Tooltip("This game's id in the launcher: hellasure, train-with-elsa, ricks-lewd-universe, kiva-sucks-at-videogames.")]
@@ -37,8 +43,24 @@ namespace Viznity.SharedSettings
         [Tooltip("PlayerPrefsIndex: the PlayerPrefs int key the game's language menu reads.")]
         public string playerPrefsKey = "currentOption";
 
-        [Tooltip("PlayerPrefsIndex: language codes in menu order (index 0 = first option). Matched by primary language, so \"pt\" also covers \"pt-BR\".")]
+        [Tooltip("PlayerPrefsIndex / GameSettingsStore: language codes in option order (index 0 = first option), matched by primary language (\"pt\" also covers \"pt-BR\"). Leave empty to use Unity Localization's locale order (needs com.unity.localization).")]
         public List<string> languageCodes = new List<string>();
+
+        [Header("GameSettingsStore")]
+        [Tooltip("Full name of the static class that stores the game's settings, e.g. Game.UI.SettingsSaveManager.")]
+        public string settingsStoreType = "";
+
+        [Tooltip("Static method taking (string key, int value).")]
+        public string settingsStoreSetIntMethod = "SetInt";
+
+        [Tooltip("Optional static method without parameters that writes the store to disk, e.g. SaveSettings.")]
+        public string settingsStoreSaveMethod = "SaveSettings";
+
+        [Tooltip("Keys that receive the language index, e.g. OptionPicker_Language and OptionPicker_DialogueLanguage.")]
+        public List<string> settingsStoreKeys = new List<string>();
+
+        [Tooltip("Optional \"Namespace.Type.Method\" (static, no parameters) the game uses to apply its saved settings, called after writing, e.g. Game.UI.SettingsBootstrap.ReloadAndApply.")]
+        public string reapplyMethod = "";
 
         [Tooltip("Optional: a PlayerPrefs string key where an older per-game script kept its \"last applied\" marker. Carried over once so players keep their in-game choice.")]
         public string legacyMarkerPrefKey = "";
@@ -61,6 +83,11 @@ namespace Viznity.SharedSettings
             }
             return -1;
         }
+
+        /// <summary>True when the language index is taken from Unity Localization's locales instead of <see cref="languageCodes"/>.</summary>
+        public bool UsesLocaleOrder =>
+            (languageTarget == LanguageTarget.PlayerPrefsIndex || languageTarget == LanguageTarget.GameSettingsStore) &&
+            (languageCodes == null || languageCodes.Count == 0);
 
         /// <summary>The config from Resources, or null when the game has none.</summary>
         public static ViznitySharedSettingsConfig Load() => Resources.Load<ViznitySharedSettingsConfig>(ResourceName);

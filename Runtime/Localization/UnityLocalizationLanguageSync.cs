@@ -28,13 +28,39 @@ namespace Viznity.SharedSettings.Localization
             try
             {
                 var config = ViznitySharedSettingsConfig.Load();
-                if (config == null || config.languageTarget != ViznitySharedSettingsConfig.LanguageTarget.UnityLocalization) return;
+                if (config == null) return;
                 if (!string.IsNullOrEmpty(config.gameId)) ViznitySharedSettings.GameId = config.gameId;
-                ApplyWhenReady();
+                if (config.languageTarget == ViznitySharedSettingsConfig.LanguageTarget.UnityLocalization) ApplyWhenReady();
+                else if (config.UsesLocaleOrder) ApplyIndexWhenReady(config);
             }
             catch (System.Exception e)
             {
                 Debug.LogWarning("[Viznity Shared Settings] Localization sync skipped: " + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// PlayerPrefsIndex / GameSettingsStore without a code list: the option index is the locale's position in
+        /// <c>LocalizationSettings.AvailableLocales</c> (Hellasure's settings use exactly that order).
+        /// </summary>
+        public static void ApplyIndexWhenReady(ViznitySharedSettingsConfig config)
+        {
+            if (!LanguageSync.TryTakeChangedLanguage(out string code)) return;
+            Run(Apply());
+
+            IEnumerator Apply()
+            {
+                var init = LocalizationSettings.InitializationOperation;
+                if (!init.IsDone) yield return init;
+                Locale locale = FindLocale(code);
+                var locales = LocalizationSettings.AvailableLocales?.Locales;
+                int index = locale != null && locales != null ? locales.IndexOf(locale) : -1;
+                if (index < 0)
+                {
+                    Debug.Log($"[Viznity Shared Settings] This game has no '{code}' locale; keeping its own language.");
+                    yield break;
+                }
+                SharedSettingsBootstrap.WriteLanguageIndex(config, code, index);
             }
         }
 
@@ -45,9 +71,31 @@ namespace Viznity.SharedSettings.Localization
         public static void ApplyWhenReady()
         {
             if (!LanguageSync.TryTakeChangedLanguage(out string code)) return;
-            var runner = new GameObject("[Viznity Localization Sync]") { hideFlags = HideFlags.HideAndDontSave };
-            Object.DontDestroyOnLoad(runner);
-            runner.AddComponent<Runner>().Begin(code);
+            Run(SelectLocale(code));
+        }
+
+        private static IEnumerator SelectLocale(string code)
+        {
+            var init = LocalizationSettings.InitializationOperation;
+            if (!init.IsDone) yield return init;
+            Locale locale = FindLocale(code);
+            if (locale != null)
+            {
+                LocalizationSettings.SelectedLocale = locale;
+                Debug.Log($"[Viznity Shared Settings] Using the launcher language '{code}' ({locale.Identifier.Code}).");
+            }
+            else
+            {
+                Debug.Log($"[Viznity Shared Settings] This game has no '{code}' locale; keeping its own language.");
+            }
+        }
+
+        /// <summary>Runs a coroutine on a hidden helper object that removes itself when done.</summary>
+        private static void Run(IEnumerator routine)
+        {
+            var go = new GameObject("[Viznity Localization Sync]") { hideFlags = HideFlags.HideAndDontSave };
+            Object.DontDestroyOnLoad(go);
+            go.AddComponent<Runner>().Begin(routine);
         }
 
         /// <summary>
@@ -73,22 +121,11 @@ namespace Viznity.SharedSettings.Localization
 
         private sealed class Runner : MonoBehaviour
         {
-            public void Begin(string code) => StartCoroutine(Apply(code));
+            public void Begin(IEnumerator routine) => StartCoroutine(RunThenRemove(routine));
 
-            private IEnumerator Apply(string code)
+            private IEnumerator RunThenRemove(IEnumerator routine)
             {
-                var init = LocalizationSettings.InitializationOperation;
-                if (!init.IsDone) yield return init;
-                Locale locale = FindLocale(code);
-                if (locale != null)
-                {
-                    LocalizationSettings.SelectedLocale = locale;
-                    Debug.Log($"[Viznity Shared Settings] Using the launcher language '{code}' ({locale.Identifier.Code}).");
-                }
-                else
-                {
-                    Debug.Log($"[Viznity Shared Settings] This game has no '{code}' locale; keeping its own language.");
-                }
+                yield return routine;
                 Destroy(gameObject);
             }
         }

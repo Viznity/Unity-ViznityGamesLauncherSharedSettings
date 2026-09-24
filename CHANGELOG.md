@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0] - 2026-09-24
+
+- New language target `GameSettingsStore`: writes the option index into a game's own settings store
+  by name (static `SetInt(string, int)`, a save method, then a re-apply method), so games with their
+  own settings system (Hellasure's `Game.UI.SettingsSaveManager`) apply the launcher language through
+  their own code and show it in their settings menu. No compile-time dependency on game code.
+- `PlayerPrefsIndex` and `GameSettingsStore` can take the option order from Unity Localization's
+  locales when Language Codes is left empty.
+
 ## [1.1.0] - 2026-09-24
 
 - Per-game setup without a script: `ViznitySharedSettingsConfig` asset in `Assets/Resources`
