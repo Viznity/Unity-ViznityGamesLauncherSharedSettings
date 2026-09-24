@@ -1,0 +1,14 @@
+{
+    "name": "Viznity.SharedSettings",
+    "rootNamespace": "Viznity.SharedSettings",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

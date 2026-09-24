@@ -1,0 +1,22 @@
+{
+  "name": "com.viznitygames.sharedsettings",
+  "version": "1.0.0",
+  "displayName": "Viznity Shared Settings",
+  "description": "Reads the settings Viznity Games Desktop shares with installed games (language, per-game language, skip intro, achievement notifications, and any key added later) from the per-user shared-settings.json. No dependencies; optional Unity Localization support.",
+  "unity": "2021.3",
+  "keywords": ["viznity", "launcher", "settings", "localization"],
+  "author": {
+    "name": "Viznity Games",
+    "url": "https://viznitygames.com"
+  },
+  "documentationUrl": "https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings#readme",
+  "changelogUrl": "https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/Viznity/Unity-ViznityGamesLauncherSharedSettings/blob/main/LICENSE.md",
+  "samples": [
+    {
+      "displayName": "Option-index language menu",
+      "description": "Maps the launcher language onto a game whose language menu stores an option index in PlayerPrefs (the Rick's Lewd Universe setup).",
+      "path": "Samples~/OptionIndexLanguage"
+    }
+  ]
+}

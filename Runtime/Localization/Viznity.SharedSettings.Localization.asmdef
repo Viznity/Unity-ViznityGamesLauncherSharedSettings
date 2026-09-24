@@ -1,0 +1,25 @@
+{
+    "name": "Viznity.SharedSettings.Localization",
+    "rootNamespace": "Viznity.SharedSettings.Localization",
+    "references": [
+        "Viznity.SharedSettings",
+        "Unity.Localization"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "VIZNITY_UNITY_LOCALIZATION"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.localization",
+            "expression": "1.0.0",
+            "define": "VIZNITY_UNITY_LOCALIZATION"
+        }
+    ],
+    "noEngineReferences": false
+}
