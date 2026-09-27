@@ -16,7 +16,9 @@ namespace Viznity.SharedSettings
         /// <summary>This game's name without spaces or punctuation: "Rick's Lewd Universe" -> "RicksLewdUniverse" (the GitLab project is that + "Build").</summary>
         public static string PascalFromProductName() => Pascal(Application.productName);
 
-        /// <summary>Lower case, apostrophes dropped, every other run of non-alphanumerics becomes one '-'.</summary>
+        /// <summary>Lower case, apostrophes dropped, every other run of non-alphanumerics becomes one '-'.
+        /// This is THE game-id convention now: the release API, SupabaseStatsConfig.gameId and
+        /// PatreonConfig.gameId all use this same hyphenated form.</summary>
         public static string Slug(string name)
         {
             if (string.IsNullOrEmpty(name)) return string.Empty;

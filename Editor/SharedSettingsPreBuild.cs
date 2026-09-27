@@ -2,7 +2,6 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
-using System.Text.RegularExpressions;
 using System.Linq;
 
 namespace Viznity.SharedSettings.Editor
@@ -42,9 +41,10 @@ namespace Viznity.SharedSettings.Editor
 
             if (string.IsNullOrEmpty(config.gameId))
             {
-                string productName = PlayerSettings.productName;
-                string safeName = Regex.Replace(productName, @"[^a-zA-Z0-9]", "").ToLowerInvariant();
-                config.gameId = safeName;
+                // Hyphenated slug: must match ViznitySharedSettings.GameId's own fallback
+                // (GameIdentity.FromProductName) and the release API's game ids
+                // ("ricks-lewd-universe"), not the compact Supabase/Patreon convention.
+                config.gameId = GameIdentity.Slug(PlayerSettings.productName);
                 changed = true;
             }
 
